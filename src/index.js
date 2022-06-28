@@ -1,5 +1,10 @@
+import { operations } from '#Constants/operations.js';
 import { BINARY_OPERATORS } from '#Constants/operators.js';
 import { InvalidInputError } from '#Errors/invalidInputError.js';
+import {
+    getBinaryOperatings,
+    getSingleOperatings,
+} from '#Lib/getOperatings.js';
 import { getOperator } from '#Lib/getOperator.js';
 import { promptQuestion } from '#Lib/promptQuestion.js';
 
@@ -25,37 +30,22 @@ import { promptQuestion } from '#Lib/promptQuestion.js';
         let firstOperating, secondOperating;
 
         if (BINARY_OPERATORS.includes(operator)) {
-            if (!splittedInput[0] || !splittedInput[1])
-                throw new InvalidInputError();
-
-            firstOperating = Number(splittedInput[0].replaceAll(',', '.'));
-            secondOperating = Number(splittedInput[1].replaceAll(',', '.'));
-            if (isNaN(firstOperating) || !isFinite(firstOperating))
-                throw new InvalidInputError();
-            if (isNaN(secondOperating) || !isFinite(secondOperating))
-                throw new InvalidInputError();
+            [firstOperating, secondOperating] =
+                getBinaryOperatings(splittedInput);
         } else {
-            if (splittedInput[0] || !splittedInput[1])
-                throw new InvalidInputError();
-
-            firstOperating = splittedInput[1];
-            if (
-                firstOperating[0] !== '(' &&
-                firstOperating[firstOperating.length - 1] !== ')'
-            )
-                throw new InvalidInputError();
-            firstOperating = firstOperating.slice(1, -1);
-            firstOperating = Number(firstOperating.replaceAll(',', '.'));
-            if (isNaN(firstOperating) || !isFinite(firstOperating))
-                throw new InvalidInputError();
+            [firstOperating] = getSingleOperatings(splittedInput);
         }
-        console.log(firstOperating, operator, secondOperating);
+
+        // 3. realizar la operación
+        const result = operations[operator](firstOperating, secondOperating);
+        const roundedResult = Number(Math.round(result + 'e+5') + 'e-5');
+
+        // 4. mostrar resultado
+        if (isNaN(roundedResult) || !isFinite(roundedResult))
+            console.log('OPERACIÓN NO VÁLIDA');
+        else console.log(roundedResult);
     } catch (e) {
         if (e instanceof InvalidInputError) console.log(e.message);
         else console.log(`Error no esperado: ${e.message}. Stack: ${e.stack}`);
     }
-
-    // 3. realizar la operación
-
-    // 4. mostrar resultado
 })();
