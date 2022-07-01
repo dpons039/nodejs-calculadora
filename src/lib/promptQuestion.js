@@ -10,4 +10,4 @@ export const promptQuestion = promisify(consoleInterface.question).bind(
     consoleInterface
 );
 
-export const closeInterface = () => consoleInterface.close()
+export const closeInterface = () => consoleInterface.close();

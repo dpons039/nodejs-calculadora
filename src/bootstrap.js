@@ -1,11 +1,6 @@
 import { operations } from '#Constants/operations.js';
-import { BINARY_OPERATORS } from '#Constants/operators.js';
 import { InvalidInputError } from '#Errors/invalidInputError.js';
-import {
-    getBinaryOperatings,
-    getSingleOperatings,
-} from '#Lib/getOperatings.js';
-import { getOperator } from '#Lib/getOperator.js';
+import { extractByRegex } from '#Lib/extractByRegex.js';
 import { promptQuestion } from '#Lib/promptQuestion.js';
 
 export const bootstrap = async () => {
@@ -14,7 +9,7 @@ export const bootstrap = async () => {
         const userAnswer = await promptQuestion('Introduce tu operación: ');
 
         // 2. validar la entrada
-        const standarizeInput = userAnswer.trim();
+        const standarizeInput = userAnswer.trim().replaceAll(',','.');
 
         if (!standarizeInput) {
             throw new InvalidInputError();
@@ -22,22 +17,9 @@ export const bootstrap = async () => {
         if (standarizeInput === 'exit') {
             return true;
         }
-        const operator = getOperator(standarizeInput);
 
-        if (!operator) {
-            throw new InvalidInputError();
-        }
-
-        const splittedInput = standarizeInput.split(operator);
-
-        let firstOperating, secondOperating;
-
-        if (BINARY_OPERATORS.includes(operator)) {
-            [firstOperating, secondOperating] =
-                getBinaryOperatings(splittedInput);
-        } else {
-            [firstOperating] = getSingleOperatings(splittedInput);
-        }
+        const [firstOperating, operator, secondOperating] =
+            extractByRegex(standarizeInput);
 
         // 3. realizar la operación
         const result = operations[operator](firstOperating, secondOperating);
@@ -49,6 +31,7 @@ export const bootstrap = async () => {
         else console.log(`El resultado es: ${roundedResult}\n`);
     } catch (e) {
         if (e instanceof InvalidInputError) console.log(`${e.message}\n`);
-        else console.log(`Error no esperado: ${e.message}. Stack: ${e.stack}\n`);
+        else
+            console.log(`Error no esperado: ${e.message}. Stack: ${e.stack}\n`);
     }
 };
